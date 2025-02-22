@@ -1,23 +1,55 @@
-digit [0-9] 
-letter [A-Za-z]
-%{
-int count_id,count_key; 
-%}
-%%
-(stdio.h|conio.h) { printf("%s is a standard library\n",yytext); } 
-(include|void|main|printf|int) { printf("%s is a keyword\n",yytext); count_key++; } 
-{letter}({letter}|{digit})* { printf("%s is a identifier\n", yytext); count_id++; } 
-{digit}+ { printf("%s is a number\n", yytext); } 
-\"(\\.|[^"\\])*\" { printf("%s is a string literal\n", yytext); } 
-.|\n { } 
-%%
-int yywrap(void) { 
-return 1; 
+/* LEX code to replace a word with another 
+taking input from file */
+
+/* Definition section */
+/* variable replace_with and replace can be 
+accessed inside rule section and main() */
+
+%{ 
+#include<stdio.h> 
+#include<string.h> 
+
+char replace_with [] = "Best"; 
+char replace [] ="A"; 
+
+
+%} 
+
+/* Rule Section */
+/* Rule 1 compares the matched token with the 
+word to replace and replaces with another word 
+on successful match else simply writes the 
+content of input file to output file */
+/* Rule 2 matches everything other than string 
+like whitespace, digits, special symbols etc 
+and writes it to output file */
+
+%% 
+[a-zA-Z]+ { if(strcmp(yytext, replace)==0) 
+				fprintf(yyout, "%s", replace_with); 
+				else
+					fprintf(yyout, "%s", yytext);} 
+.		 fprintf(yyout, "%s", yytext); 
+%% 
+
+
+int yywrap() 
+{ 
+	return 1; 
 } 
-int main(int argc, char *argv[]) {
-yyin = fopen(argv[1], "r"); 
-yylex(); 
-printf("number of identifiers = %d\n", count_id); 
-printf("number of keywords = %d\n", count_key); 
-fclose(yyin); 
-} 
+
+/* code section */
+int main() 
+{ 
+		extern FILE *yyin, *yyout; 
+		
+		/* open the input file 
+		in read mode */
+	yyin=fopen("input.txt", "r"); 
+
+		/* open the output file 
+		in write mode */
+	yyout=fopen("output.txt", "w"); 
+	
+		yylex(); 
+}
